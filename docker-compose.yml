@@ -1,0 +1,134 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.3
+    container_name: kop-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2182:2181"
+    networks:
+      - kop-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: kop-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9093:9092"
+      - "29093:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - kop-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:29092"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  mysql-order:
+    image: mysql:8.0
+    container_name: kop-mysql-order
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ORDER_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_ORDER_DATABASE:-order_db}
+      MYSQL_USER: ${MYSQL_ORDER_USER:-order_user}
+      MYSQL_PASSWORD: ${MYSQL_ORDER_PASSWORD:-order_pass}
+    ports:
+      - "${MYSQL_ORDER_PORT:-3313}:3306"
+    volumes:
+      - mysql-order-data:/var/lib/mysql
+    networks:
+      - kop-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ORDER_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mysql-payment:
+    image: mysql:8.0
+    container_name: kop-mysql-payment
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PAYMENT_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_PAYMENT_DATABASE:-payment_db}
+      MYSQL_USER: ${MYSQL_PAYMENT_USER:-payment_user}
+      MYSQL_PASSWORD: ${MYSQL_PAYMENT_PASSWORD:-payment_pass}
+    ports:
+      - "${MYSQL_PAYMENT_PORT:-3314}:3306"
+    volumes:
+      - mysql-payment-data:/var/lib/mysql
+    networks:
+      - kop-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_PAYMENT_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: kop-order-service
+    depends_on:
+      mysql-order:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "${ORDER_SERVICE_PORT:-8085}:8085"
+    environment:
+      MYSQL_HOST: mysql-order
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_ORDER_DATABASE:-order_db}
+      MYSQL_USER: ${MYSQL_ORDER_USER:-order_user}
+      MYSQL_PASSWORD: ${MYSQL_ORDER_PASSWORD:-order_pass}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - kop-network
+    restart: on-failure
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: kop-payment-service
+    depends_on:
+      mysql-payment:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "${PAYMENT_SERVICE_PORT:-8086}:8086"
+    environment:
+      MYSQL_HOST: mysql-payment
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_PAYMENT_DATABASE:-payment_db}
+      MYSQL_USER: ${MYSQL_PAYMENT_USER:-payment_user}
+      MYSQL_PASSWORD: ${MYSQL_PAYMENT_PASSWORD:-payment_pass}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - kop-network
+    restart: on-failure
+
+networks:
+  kop-network:
+    driver: bridge
+
+volumes:
+  mysql-order-data:
+  mysql-payment-data:
