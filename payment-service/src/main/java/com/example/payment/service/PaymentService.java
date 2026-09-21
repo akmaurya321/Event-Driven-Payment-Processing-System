@@ -1,4 +1,5 @@
-package com.example.payment.service;
+git remote add origin https://github.com/akmauyra321/Event-Driven-Payment-Processing-System.git
+        git push -u origin mainpackage com.example.payment.service;
 
 import com.example.payment.dto.OrderEvent;
 import com.example.payment.dto.PaymentEvent;
