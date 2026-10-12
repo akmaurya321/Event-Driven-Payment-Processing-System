@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f5f1">
+    <meta name="description" content="Live dashboard for an event-driven order and payment processing system.">
+    <title>Pulse — Payment operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#overview" aria-label="Pulse home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M5 17h6l3.2-8 5.1 15 3.1-7H27" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span>pulse<span class="brand-period">.</span></span>
+        </a>
+
+        <div class="workspace-label">WORKSPACE</div>
+        <nav class="side-nav" aria-label="Main navigation">
+          <a class="nav-link active" href="#overview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>
+            Overview
+          </a>
+          <a class="nav-link" href="#orders">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L21 9H7"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+            Orders
+            <span class="nav-count" id="nav-order-count">—</span>
+          </a>
+          <a class="nav-link" href="#architecture">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/><path d="M10 7h4a3 3 0 0 1 3 3v4M14 17h-4a3 3 0 0 1-3-3v-4"/></svg>
+            Event flow
+          </a>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+        <div class="environment-card">
+          <span class="environment-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42m-9.88 9.88-1.42 1.42"/><circle cx="12" cy="12" r="4"/></svg>
+          </span>
+          <div><strong>Local environment</strong><span>Docker Compose</span></div>
+          <span class="environment-dot" id="sidebar-health-dot"></span>
+        </div>
+        <div class="sidebar-footer">EVENT-DRIVEN PAYMENTS<br><span>DEVELOPER CONSOLE · V1.0</span></div>
+      </aside>
+
+      <main class="main-content" id="overview">
+        <header class="topbar">
+          <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong>Overview</strong></div>
+          <div class="topbar-actions">
+            <span class="live-indicator"><span class="live-dot" id="header-health-dot"></span><span id="connection-label">Connecting to services</span></span>
+            <span class="topbar-divider"></span>
+            <span class="avatar" aria-label="Demo workspace">P</span>
+          </div>
+        </header>
+
+        <div class="page-content">
+          <section class="welcome-row">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> OVERVIEW</div>
+              <h1>Payment operations</h1>
+              <p class="welcome-copy">Orders, payments, and event processing at a glance.</p>
+            </div>
+            <button class="button button-primary" id="open-order-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Create order
+            </button>
+          </section>
+
+          <div class="notice notice-error" id="page-error" role="alert" hidden></div>
+
+          <section class="stats-grid" aria-label="Order metrics">
+            <article class="stat-card">
+              <div class="stat-heading"><span>Orders</span><span class="stat-icon icon-blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM8 3v4m8-4v4M4 10h16"/></svg></span></div>
+              <div class="stat-value" id="total-orders">—</div>
+              <div class="stat-caption">All time</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-heading"><span>Order volume</span><span class="stat-icon icon-violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20m5-15.5C17 4.6 15 3.5 12 3.5 8.7 3.5 7 5.1 7 7.4c0 5.1 10 2.1 10 7.4 0 2.4-2 4.2-5 4.2-2.6 0-4.8-1-5.6-3"/></svg></span></div>
+              <div class="stat-value" id="payment-volume">—</div>
+              <div class="stat-caption">Combined order value</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-heading"><span>Paid</span><span class="stat-icon icon-green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span></div>
+              <div class="stat-value" id="successful-orders">—</div>
+              <div class="stat-caption" id="success-caption">Successful payments</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-heading"><span>Attention</span><span class="stat-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4m0 4h.01M10.3 4.5 2.7 18a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3l-7.6-13.5a2 2 0 0 0-3.4 0Z"/></svg></span></div>
+              <div class="stat-value" id="attention-orders">—</div>
+              <div class="stat-caption">Failed or in progress</div>
+            </article>
+          </section>
+
+          <section class="content-grid">
+            <article class="panel orders-panel" id="orders">
+              <div class="panel-header">
+                <div><h2>Orders</h2><p id="orders-summary">—</p></div>
+                <div class="table-actions">
+                  <label class="search-box">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+                    <input id="order-search" type="search" placeholder="Search orders" aria-label="Search orders">
+                  </label>
+                  <button class="button button-quiet" id="refresh-button" type="button" aria-label="Refresh orders">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.4-3"/></svg>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th scope="col">ORDER</th><th scope="col">CUSTOMER / ITEM</th><th scope="col">AMOUNT</th><th scope="col">STATUS</th><th scope="col">CREATED</th><th scope="col"><span class="visually-hidden">ACTIONS</span></th></tr></thead>
+                  <tbody id="orders-body"><tr><td colspan="6" class="table-message">Connecting to order service…</td></tr></tbody>
+                </table>
+              </div>
+              <div class="table-footer"><span class="auto-refresh"><span class="live-dot"></span> Updates every 5 seconds</span><span>Latest first</span></div>
+            </article>
+
+            <aside class="panel tracking-panel" aria-live="polite">
+              <div class="panel-header tracking-header">
+                <div><div class="section-overline">SELECTED ORDER</div><h2>Payment activity</h2></div>
+                <span class="trace-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h4l2-6 4 12 2-6h4"/></svg></span>
+              </div>
+              <div class="tracking-placeholder" id="tracking-placeholder">
+                <span class="placeholder-orbit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h6l2 5 3-8 2 5h3"/></svg></span>
+                <strong>Follow an order</strong>
+                <p>Create an order or select one from the table to see its progress through Kafka.</p>
+              </div>
+              <div id="tracking-content" hidden>
+                <div class="tracking-order"><span>TRACKING ORDER</span><strong id="tracking-order-id">—</strong></div>
+                <div class="tracking-product" id="tracking-product">—</div>
+                <div class="event-timeline" id="event-timeline"></div>
+                <div class="payment-note" id="payment-note"></div>
+              </div>
+              <div class="tracking-footer"><span class="kafka-mark">K</span><span>Powered by Apache Kafka</span><span class="flow-pulse"></span></div>
+            </aside>
+          </section>
+
+          <section class="panel architecture-panel" id="architecture">
+            <div class="architecture-intro">
+              <div class="section-overline">THE EVENT PIPELINE</div>
+              <h2>Independent services.<br>Connected by events.</h2>
+              <p>Asynchronous events connect the services.</p>
+            </div>
+            <div class="architecture-flow" aria-label="Order service publishes to the order-created-events Kafka topic. Payment service consumes the event, processes it, and publishes to payment-completed-events. Order service consumes the payment result and updates the order.">
+              <div class="architecture-node"><span class="node-icon node-order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v15H4zM8 3v4m8-4v4M4 10h16"/></svg></span><strong>Order service</strong><span>Creates order</span></div>
+              <div class="flow-connector"><span></span><div><i></i></div></div>
+              <div class="architecture-node topic-node"><span class="topic-mark">K</span><strong>order-created-events</strong><span>Kafka topic</span></div>
+              <div class="flow-connector"><span></span><div><i></i></div></div>
+              <div class="architecture-node"><span class="node-icon node-payment"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18m-13 5h3"/></svg></span><strong>Payment service</strong><span>Processes payment</span></div>
+              <div class="flow-connector"><span></span><div><i></i></div></div>
+              <div class="architecture-node topic-node"><span class="topic-mark">K</span><strong>payment-completed-events</strong><span>Kafka topic</span></div>
+              <div class="flow-connector"><span></span><div><i></i></div></div>
+              <div class="architecture-node update-node"><span class="node-icon node-order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span><strong>Order updated</strong><span>Paid or failed</span></div>
+            </div>
+          </section>
+          <footer class="page-footer"><span>EVENT-DRIVEN PAYMENT SYSTEM <i></i> LOCAL DEMO ENVIRONMENT</span><span>ORDER <code>:8085</code><i></i> PAYMENT <code>:8086</code><i></i> KAFKA <code>:9093</code></span></footer>
+        </div>
+      </main>
+    </div>
+
+    <dialog class="order-dialog" id="order-dialog" aria-labelledby="dialog-title">
+      <form id="order-form">
+        <div class="dialog-top">
+          <span class="dialog-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+          <button class="dialog-close" type="button" id="close-dialog-button" aria-label="Close dialog">×</button>
+        </div>
+        <div class="section-overline">NEW TRANSACTION</div>
+        <h2 id="dialog-title">Create an order</h2>
+        <p class="dialog-copy">Submit an order and watch it move through the payment event pipeline.</p>
+        <label for="customer-name">Customer name</label>
+        <input id="customer-name" name="customerName" type="text" placeholder="e.g. Alex Morgan" autocomplete="name" maxlength="120" required>
+        <label for="product-name">Product</label>
+        <input id="product-name" name="productName" type="text" placeholder="e.g. Wireless headphones" maxlength="200" required>
+        <div class="form-row">
+          <div><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="1" step="1" value="1" required></div>
+          <div><label for="amount">Order total</label><div class="amount-input"><span>$</span><input id="amount" name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div></div>
+        </div>
+        <div class="form-error" id="form-error" role="alert" hidden></div>
+        <button class="button button-primary submit-order" id="submit-order-button" type="submit">Send order <span aria-hidden="true">→</span></button>
+        <p class="secure-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Your order is sent to the order service</p>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

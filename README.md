@@ -43,6 +43,7 @@ flowchart LR
 kafka-order-payment-system/
 ├── order-service/          # REST API + Kafka producer/consumer
 ├── payment-service/        # Kafka consumer + payment simulation
+├── frontend/               # Responsive HTML/CSS/JS dashboard + Nginx proxy
 ├── docker-compose.yml      # Full stack (Zookeeper, Kafka, MySQL, services)
 ├── postman/                # Postman collection
 ├── .env.example
@@ -83,6 +84,12 @@ docker compose up --build -d
 ```
 
 Wait until all containers are healthy (first build may take several minutes).
+
+### Frontend Demo
+
+The project includes a responsive operations dashboard served by Nginx. Start the full stack with the commands above, then open **http://localhost:3000**. The dashboard reads live orders from the order service, lets you create an order, refreshes order statuses automatically, and shows the selected order's progress through the payment event flow. The frontend proxies API requests to both services, so no browser CORS setup is needed.
+
+To change the frontend port, set `FRONTEND_PORT` in `.env` (defaults to `3000`).
 
 ### Verify
 
